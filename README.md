@@ -9,10 +9,10 @@ Add the dependency to your `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core module (required for credentials and authentication)
-    implementation("digital.guimauve.flareon:core:0.1.0")
+    implementation("digital.guimauve.flareon:core:0.1.1")
 
     // Messaging module (for Firebase Cloud Messaging)
-    implementation("digital.guimauve.flareon:messaging:0.1.0")
+    implementation("digital.guimauve.flareon:messaging:0.1.1")
 }
 ```
 
