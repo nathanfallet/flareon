@@ -17,14 +17,19 @@ import kotlinx.serialization.json.Json
  * Handles OAuth2 token fetching, caching, and automatic refresh using service account credentials.
  *
  * This mirrors the approach used by the Firebase Admin Java SDK's GoogleCredentials.
- *
- * @param serviceAccount The Firebase service account credentials
- * @param httpClient The Ktor HTTP client for making requests (defaults to a new client)
- * @param cryptographyProvider The cryptography provider for JWT signing (defaults to platform-specific provider)
  */
 class GoogleCredentials(
-    private val serviceAccount: ServiceAccountCredentials,
+    /**
+     * The Firebase service account credentials
+     */
+    val serviceAccount: ServiceAccountCredentials,
+    /**
+     * The Ktor HTTP client for making requests (defaults to a new client)
+     */
     private val httpClient: HttpClient = HttpClientFactory.createClient(),
+    /**
+     * The cryptography provider for JWT signing (defaults to platform-specific provider)
+     */
     private val cryptographyProvider: CryptographyProvider = CryptographyProviderFactory.getDefault(),
 ) {
     private val jwtBuilder = JwtBuilder(cryptographyProvider)

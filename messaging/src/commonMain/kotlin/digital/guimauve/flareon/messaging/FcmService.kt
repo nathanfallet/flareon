@@ -16,12 +16,12 @@ import io.ktor.http.*
  * Uses the FCM HTTP v1 API for sending messages to devices.
  *
  * @param projectId The Firebase project ID
- * @param credentials The Google credentials for obtaining access tokens
  * @param httpClient The Ktor HTTP client for making requests (defaults to a new client)
+ * @param credentials The Google credentials for obtaining access tokens (defaults to provided credentials)
  */
 class FcmService(
-    private val projectId: String,
     private val credentials: GoogleCredentials,
+    private val projectId: String = credentials.serviceAccount.projectId,
     private val httpClient: HttpClient = HttpClientFactory.createClient(),
 ) {
     companion object {
