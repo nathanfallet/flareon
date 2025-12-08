@@ -43,7 +43,7 @@ First, obtain a service account JSON file from your Firebase Console:
 ```kotlin
 import digital.guimauve.flareon.core.credentials.GoogleCredentials
 
-// Load from JSON string
+// Load from JSON string (in production, load the string from a secure location like file or environment variable)
 val serviceAccountJson = """
 {
   "type": "service_account",
@@ -64,10 +64,7 @@ import digital.guimauve.flareon.messaging.FcmService
 import digital.guimauve.flareon.messaging.models.*
 
 // Initialize the service
-val messaging = FcmService(
-    projectId = "your-project-id",
-    credentials = credentials
-)
+val messaging = FcmService(credentials)
 
 // Send a simple notification
 val response = messaging.sendNotification(
@@ -231,10 +228,7 @@ Example:
 ```kotlin
 import digital.guimauve.flareon.messaging.FcmService
 
-val messaging = FcmService(
-    projectId = "your-project-id",
-    credentials = credentials
-)
+val messaging = FcmService(credentials)
 
 messaging.sendNotification(
     token = "device-token",
@@ -265,7 +259,6 @@ val credentials = GoogleCredentials.fromJson(
 )
 
 val messaging = FcmService(
-    projectId = "your-project-id",
     credentials = credentials,
     httpClient = customClient
 )
