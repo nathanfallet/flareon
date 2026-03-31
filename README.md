@@ -1,5 +1,10 @@
 # Flareon
 
+[![License](https://img.shields.io/github/license/nathanfallet/flareon)](LICENSE)
+[![Maven Central Version](https://img.shields.io/maven-central/v/me.nathanfallet.flareon/core)](https://klibs.io/project/nathanfallet/flareon)
+[![Issues](https://img.shields.io/github/issues/nathanfallet/flareon)]()
+[![Pull Requests](https://img.shields.io/github/issues-pr/nathanfallet/flareon)]()
+
 A Firebase Admin SDK for Kotlin Multiplatform.
 
 ## Installation
