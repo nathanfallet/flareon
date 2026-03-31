@@ -9,10 +9,10 @@ Add the dependency to your `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core module (required for credentials and authentication)
-    implementation("digital.guimauve.flareon:core:0.1.1")
+    implementation("me.nathanfallet.flareon:core:0.1.1")
 
     // Messaging module (for Firebase Cloud Messaging)
-    implementation("digital.guimauve.flareon:messaging:0.1.1")
+    implementation("me.nathanfallet.flareon:messaging:0.1.1")
 }
 ```
 
@@ -41,7 +41,7 @@ First, obtain a service account JSON file from your Firebase Console:
 3. Save the JSON file securely
 
 ```kotlin
-import digital.guimauve.flareon.core.credentials.GoogleCredentials
+import me.nathanfallet.flareon.core.credentials.GoogleCredentials
 
 // Load from JSON string (in production, load the string from a secure location like file or environment variable)
 val serviceAccountJson = """
@@ -60,8 +60,8 @@ val credentials = GoogleCredentials.fromJson(serviceAccountJson)
 ### 2. Send Cloud Messages
 
 ```kotlin
-import digital.guimauve.flareon.messaging.FcmService
-import digital.guimauve.flareon.messaging.models.*
+import me.nathanfallet.flareon.messaging.FcmService
+import me.nathanfallet.flareon.messaging.models.*
 
 // Initialize the service
 val messaging = FcmService(credentials)
@@ -209,7 +209,7 @@ The core module provides authentication and credential management:
 Example:
 
 ```kotlin
-import digital.guimauve.flareon.core.credentials.GoogleCredentials
+import me.nathanfallet.flareon.core.credentials.GoogleCredentials
 
 val credentials = GoogleCredentials.fromJson(serviceAccountJson)
 val accessToken = credentials.getAccessToken() // Automatically cached and refreshed
@@ -226,7 +226,7 @@ The messaging module provides Firebase Cloud Messaging (FCM) functionality:
 Example:
 
 ```kotlin
-import digital.guimauve.flareon.messaging.FcmService
+import me.nathanfallet.flareon.messaging.FcmService
 
 val messaging = FcmService(credentials)
 
