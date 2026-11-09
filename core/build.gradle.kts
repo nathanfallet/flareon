@@ -84,7 +84,6 @@ kotlin {
             dependencies {
                 api(libs.kotlinx.serialization.json)
                 api(libs.kotlinx.coroutines.core)
-                api(libs.kotlinx.datetime)
                 api(libs.ktor.client.core)
                 api(libs.ktor.client.engine.defaults)
                 api(libs.ktor.client.content.negotiation)
