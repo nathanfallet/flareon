@@ -4,10 +4,10 @@ import dev.whyoleg.cryptography.CryptographyProvider
 import io.ktor.client.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import me.nathanfallet.flareon.core.crypto.CryptographyProviderFactory
 import me.nathanfallet.flareon.core.http.HttpClientFactory
+import kotlin.time.Clock
 
 /**
  * Google credentials for authenticating Firebase Admin SDK requests.
