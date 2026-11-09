@@ -14,10 +14,10 @@ Add the dependency to your `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core module (required for credentials and authentication)
-    implementation("me.nathanfallet.flareon:core:0.1.1")
+    implementation("me.nathanfallet.flareon:core:0.1.2")
 
     // Messaging module (for Firebase Cloud Messaging)
-    implementation("me.nathanfallet.flareon:messaging:0.1.1")
+    implementation("me.nathanfallet.flareon:messaging:0.1.2")
 }
 ```
 
@@ -207,7 +207,8 @@ messaging.sendMessage(message)
 
 The core module provides authentication and credential management:
 
-- **GoogleCredentials**: Manages OAuth2 access tokens, from a service account key (`fromJson`) or from the Google Cloud metadata server (`fromMetadataServer`)
+- **GoogleCredentials**: Manages OAuth2 access tokens, from a service account key (`fromJson`) or from the Google Cloud
+  metadata server (`fromMetadataServer`)
 - **JWT Builder**: Creates signed JWT assertions for authentication
 - **HTTP Client Factory**: Provides configured Ktor clients for all platforms
 
@@ -246,14 +247,17 @@ messaging.sendNotification(
 
 ### Running on Google Cloud without a key file
 
-On Cloud Run, Compute Engine or GKE, the workload already runs under a service account. Read its tokens from the metadata server instead of shipping a service account JSON key:
+On Cloud Run, Compute Engine or GKE, the workload already runs under a service account. Read its tokens from the
+metadata server instead of shipping a service account JSON key:
 
 ```kotlin
 val credentials = GoogleCredentials.fromMetadataServer()
 val messaging = FcmService(credentials) // project ID read from the metadata server
 ```
 
-Grant the service account only what it needs (for FCM, the `Firebase Cloud Messaging API Admin` role or the `cloudmessaging.messages.create` permission). The metadata server is plain HTTP and only reachable from inside Google Cloud; pass `baseUrl` to point at an emulator in tests, and `scopes` to request specific OAuth2 scopes.
+Grant the service account only what it needs (for FCM, the `Firebase Cloud Messaging API Admin` role or the
+`cloudmessaging.messages.create` permission). The metadata server is plain HTTP and only reachable from inside Google
+Cloud; pass `baseUrl` to point at an emulator in tests, and `scopes` to request specific OAuth2 scopes.
 
 ### Custom HTTP Client
 

@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "me.nathanfallet.flareon"
-    version = "0.1.1"
+    version = "0.1.2"
     project.ext.set("url", "https://github.com/nathanfallet/flareon")
     project.ext.set("license.name", "Apache 2.0")
     project.ext.set("license.url", "https://www.apache.org/licenses/LICENSE-2.0.txt")
