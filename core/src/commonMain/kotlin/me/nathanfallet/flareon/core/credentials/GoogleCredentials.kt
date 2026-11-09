@@ -2,9 +2,6 @@ package me.nathanfallet.flareon.core.credentials
 
 import dev.whyoleg.cryptography.CryptographyProvider
 import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
@@ -14,33 +11,39 @@ import me.nathanfallet.flareon.core.http.HttpClientFactory
 
 /**
  * Google credentials for authenticating Firebase Admin SDK requests.
- * Handles OAuth2 token fetching, caching, and automatic refresh using service account credentials.
+ * Handles OAuth2 token caching and automatic refresh; where the token comes from
+ * is up to the implementation:
+ *
+ * - [ServiceAccountGoogleCredentials]: a service account JSON key (see [fromJson])
+ * - [MetadataServerCredentials]: the metadata server of Google Cloud (Cloud Run, GCE, GKE...),
+ *   with no key file at all
  *
  * This mirrors the approach used by the Firebase Admin Java SDK's GoogleCredentials.
  */
-class GoogleCredentials(
-    /**
-     * The Firebase service account credentials
-     */
-    val serviceAccount: ServiceAccountCredentials,
-    /**
-     * The Ktor HTTP client for making requests (defaults to a new client)
-     */
-    private val httpClient: HttpClient = HttpClientFactory.createClient(),
-    /**
-     * The cryptography provider for JWT signing (defaults to platform-specific provider)
-     */
-    private val cryptographyProvider: CryptographyProvider = CryptographyProviderFactory.getDefault(),
-) {
-    private val jwtBuilder = JwtBuilder(cryptographyProvider)
+abstract class GoogleCredentials {
     private val mutex = Mutex()
 
     private var cachedToken: String? = null
     private var tokenExpirationTime: Long = 0
 
+    private var cachedProjectId: String? = null
+
+    /**
+     * Factories for the supported credential sources.
+     */
     companion object {
-        private const val FIREBASE_SCOPES = "https://www.googleapis.com/auth/firebase.messaging"
+        internal const val FIREBASE_SCOPES = "https://www.googleapis.com/auth/firebase.messaging"
         private const val TOKEN_EXPIRATION_BUFFER_SECONDS = 300 // Refresh 5 minutes early
+
+        /**
+         * Creates GoogleCredentials from service account credentials.
+         * Kept so that `GoogleCredentials(serviceAccount)` keeps compiling.
+         */
+        operator fun invoke(
+            serviceAccount: ServiceAccountCredentials,
+            httpClient: HttpClient = HttpClientFactory.createClient(),
+            cryptographyProvider: CryptographyProvider = CryptographyProviderFactory.getDefault(),
+        ): GoogleCredentials = ServiceAccountGoogleCredentials(serviceAccount, httpClient, cryptographyProvider)
 
         /**
          * Creates GoogleCredentials from a JSON string containing service account credentials.
@@ -54,10 +57,25 @@ class GoogleCredentials(
             serviceAccountJson: String,
             httpClient: HttpClient = HttpClientFactory.createClient(),
             cryptographyProvider: CryptographyProvider = CryptographyProviderFactory.getDefault(),
-        ): GoogleCredentials {
+        ): ServiceAccountGoogleCredentials {
             val credentials = Json.decodeFromString<ServiceAccountCredentials>(serviceAccountJson)
-            return GoogleCredentials(credentials, httpClient, cryptographyProvider)
+            return ServiceAccountGoogleCredentials(credentials, httpClient, cryptographyProvider)
         }
+
+        /**
+         * Creates GoogleCredentials that read their tokens from the metadata server of Google Cloud.
+         * Only works from inside Google Cloud (Cloud Run, GCE, GKE...), where the workload runs
+         * under a service account and no key file is needed.
+         *
+         * @param httpClient The Ktor HTTP client (defaults to a new client)
+         * @param baseUrl The metadata server URL (defaults to the one of Google Cloud)
+         * @param scopes Optional OAuth2 scopes to request (defaults to those of the service account)
+         */
+        fun fromMetadataServer(
+            httpClient: HttpClient = HttpClientFactory.createClient(),
+            baseUrl: String = MetadataServerCredentials.DEFAULT_BASE_URL,
+            scopes: List<String>? = null,
+        ): MetadataServerCredentials = MetadataServerCredentials(httpClient, baseUrl, scopes)
     }
 
     /**
@@ -70,8 +88,8 @@ class GoogleCredentials(
         val now = Clock.System.now().epochSeconds
 
         // Check if we have a valid cached token
-        if (cachedToken != null && now < tokenExpirationTime) {
-            return@withLock cachedToken!!
+        cachedToken?.let { token ->
+            if (now < tokenExpirationTime) return@withLock token
         }
 
         // Fetch a new token
@@ -83,6 +101,14 @@ class GoogleCredentials(
     }
 
     /**
+     * Gets the ID of the Google Cloud / Firebase project these credentials belong to.
+     * The value is cached once it has been read.
+     */
+    suspend fun getProjectId(): String = mutex.withLock {
+        cachedProjectId ?: fetchProjectId().also { cachedProjectId = it }
+    }
+
+    /**
      * Clears the cached token, forcing a refresh on the next call to getAccessToken().
      */
     fun clearCache() {
@@ -91,25 +117,12 @@ class GoogleCredentials(
     }
 
     /**
-     * Fetches a new OAuth2 access token from Google's token endpoint.
-     *
-     * @return The OAuth2 token response
+     * Fetches a new OAuth2 access token from the source of these credentials.
      */
-    private suspend fun fetchAccessToken(): OAuth2TokenResponse {
-        // Create JWT assertion
-        val assertion = jwtBuilder.createAssertion(
-            credentials = serviceAccount,
-            scopes = listOf(FIREBASE_SCOPES)
-        )
+    protected abstract suspend fun fetchAccessToken(): OAuth2TokenResponse
 
-        // Exchange JWT for access token
-        val response = httpClient.post(serviceAccount.tokenUri) {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=$assertion"
-            )
-        }
-
-        return response.body<OAuth2TokenResponse>()
-    }
+    /**
+     * Reads the project ID from the source of these credentials.
+     */
+    protected abstract suspend fun fetchProjectId(): String
 }

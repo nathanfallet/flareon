@@ -15,13 +15,13 @@ import me.nathanfallet.flareon.messaging.models.FcmResponse
  * Service for sending Firebase Cloud Messaging (FCM) notifications.
  * Uses the FCM HTTP v1 API for sending messages to devices.
  *
- * @param projectId The Firebase project ID
+ * @param projectId The Firebase project ID (defaults to the one of the credentials)
  * @param httpClient The Ktor HTTP client for making requests (defaults to a new client)
  * @param credentials The Google credentials for obtaining access tokens (defaults to provided credentials)
  */
 class FcmService(
     private val credentials: GoogleCredentials,
-    private val projectId: String = credentials.serviceAccount.projectId,
+    private val projectId: String? = null,
     private val httpClient: HttpClient = HttpClientFactory.createClient(),
 ) {
     companion object {
@@ -62,7 +62,7 @@ class FcmService(
      */
     suspend fun sendMessage(message: FcmMessage): FcmResponse {
         val accessToken = credentials.getAccessToken()
-        val url = "$FCM_API_URL/projects/$projectId/messages:send"
+        val url = "$FCM_API_URL/projects/${projectId ?: credentials.getProjectId()}/messages:send"
 
         val request = FcmRequest(message = message)
 
