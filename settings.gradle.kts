@@ -10,5 +10,6 @@ plugins {
 }
 
 rootProject.name = "flareon"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(":core")
 include(":messaging")
