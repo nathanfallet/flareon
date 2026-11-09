@@ -20,3 +20,8 @@ allprojects {
         mavenCentral()
     }
 }
+
+dependencies {
+    dokka(projects.core)
+    dokka(projects.messaging)
+}

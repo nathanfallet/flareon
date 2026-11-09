@@ -1,3 +1,7 @@
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinMultiplatform
+import com.vanniktech.maven.publish.SourcesJar
+
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.serialization)
@@ -9,7 +13,10 @@ plugins {
 }
 
 mavenPublishing {
-    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
+    // Empty javadoc jars: embedding the Dokka site in every platform publication would blow
+    // the Maven Central size limits (IDE docs come from the sources jars).
+    configure(KotlinMultiplatform(javadocJar = JavadocJar.Empty(), sourcesJar = SourcesJar.Sources()))
+    publishToMavenCentral()
     signAllPublications()
     pom {
         name.set("core")
@@ -38,20 +45,16 @@ mavenPublishing {
 kotlin {
     // Tiers are in accordance with <https://kotlinlang.org/docs/native-target-support.html>
     // Tier 1
-    macosX64()
     macosArm64()
     iosSimulatorArm64()
-    iosX64()
 
     // Tier 2
     linuxX64()
     linuxArm64()
     watchosSimulatorArm64()
-    watchosX64()
     watchosArm32()
     watchosArm64()
     tvosSimulatorArm64()
-    tvosX64()
     tvosArm64()
     iosArm64()
 
@@ -83,6 +86,7 @@ kotlin {
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kotlinx.datetime)
                 api(libs.ktor.client.core)
+                api(libs.ktor.client.engine.defaults)
                 api(libs.ktor.client.content.negotiation)
                 api(libs.ktor.serialization.json)
                 api(libs.ktor.client.logging)
@@ -98,31 +102,22 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                implementation(libs.ktor.client.cio)
                 implementation(libs.cryptography.provider.jdk)
             }
         }
         val appleMain by getting {
             dependencies {
-                implementation(libs.ktor.client.darwin)
                 implementation(libs.cryptography.provider.apple)
             }
         }
         val linuxMain by getting {
             dependencies {
-                implementation(libs.ktor.client.curl)
                 implementation(libs.cryptography.provider.openssl3.prebuilt)
             }
         }
         val mingwMain by getting {
             dependencies {
-                implementation(libs.ktor.client.winhttp)
                 implementation(libs.cryptography.provider.openssl3.prebuilt)
-            }
-        }
-        val jsMain by getting {
-            dependencies {
-                implementation(libs.ktor.client.js)
             }
         }
     }
