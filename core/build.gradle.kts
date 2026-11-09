@@ -86,6 +86,7 @@ kotlin {
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kotlinx.datetime)
                 api(libs.ktor.client.core)
+                api(libs.ktor.client.engine.defaults)
                 api(libs.ktor.client.content.negotiation)
                 api(libs.ktor.serialization.json)
                 api(libs.ktor.client.logging)
@@ -101,31 +102,22 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                implementation(libs.ktor.client.cio)
                 implementation(libs.cryptography.provider.jdk)
             }
         }
         val appleMain by getting {
             dependencies {
-                implementation(libs.ktor.client.darwin)
                 implementation(libs.cryptography.provider.apple)
             }
         }
         val linuxMain by getting {
             dependencies {
-                implementation(libs.ktor.client.curl)
                 implementation(libs.cryptography.provider.openssl3.prebuilt)
             }
         }
         val mingwMain by getting {
             dependencies {
-                implementation(libs.ktor.client.winhttp)
                 implementation(libs.cryptography.provider.openssl3.prebuilt)
-            }
-        }
-        val jsMain by getting {
-            dependencies {
-                implementation(libs.ktor.client.js)
             }
         }
     }
